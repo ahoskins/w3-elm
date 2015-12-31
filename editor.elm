@@ -8,34 +8,65 @@ import Json.Decode as Json
 
 ---------- MODEL -------------
 
-type alias Model = String
+type Action = 
+      InputChange
+    | RenderChange
+
+type alias AddressObject = 
+    { action: Action
+    , value: String
+    }
+
+type alias Model = 
+    { input: String
+    , render: String
+    }
 
 init : Model
-init = ""
+init = 
+    { input = "hello"
+    , render = "hello"
+    }
 
 ---------- UPDATE -------------
 
-update : Model -> Model -> Model
-update newStr oldStr = 
-    newStr
+update : AddressObject -> Model -> Model
+update object model = 
+    case object.action of
+        InputChange ->
+            { model |
+                input = object.value
+            }
+        RenderChange ->
+            { model |
+                render = model.input
+            }
 
 ---------- VIEW ---------------
 
 -- root view
-view : Signal.Address Model -> Model -> Html
+view : Signal.Address AddressObject -> Model -> Html
 view address model = 
     div 
         []
-        [makeTitle, mainView address model]
+        [ makeTitle, mainView address model ]
 
 
-makeInput : Signal.Address Model -> Model -> Html
+makeInput : Signal.Address AddressObject -> Model -> Html
 makeInput address model = 
     input 
-        [ on "input" targetValue (Signal.message address) 
-        , value model
+        [ on "input" targetValue (\str -> Signal.message address {action = InputChange, value = str}) 
+        , value model.input
         , style [("width", "100%")] ] 
         [ ]
+
+
+makeButton : Signal.Address AddressObject -> Html
+makeButton address = 
+    button
+        [ onClick address {action = RenderChange, value = "empty"} ]
+        [ ]
+
 
 makeTitle : Html
 makeTitle = 
@@ -43,27 +74,26 @@ makeTitle =
         [ style [("font-size", "2em")]]
         [ text "W3-Elm"]
 
--- first arg is an address that expects an Model type
-mainView : Signal.Address Model -> Model -> Html
+
+mainView : Signal.Address AddressObject -> Model -> Html
 mainView address model = 
     let editor : Html
         editor = 
             div 
                 [ style [("width", "50%")] ] 
-                [ makeInput address model ]
+                [ makeInput address model
+                , makeButton address
+                ]
         render : Html
         render = 
-            -- render the model in the iframe, the model is saved when the button is pressed
             div 
                 [ style [("width", "50%")] ]
                 [ iframe 
-                    [ srcdoc model ]
+                    [ srcdoc model.render ]
                     [ ] 
                 ]
     in
         div 
             [ style [("display", "flex")] ]
             [ editor, render ]
-
-
 
