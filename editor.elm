@@ -9,13 +9,9 @@ import Json.Decode as Json
 ---------- MODEL -------------
 
 type Action = 
-      InputChange
+    -- union type
+      InputChange String 
     | RenderChange
-
-type alias AddressObject = 
-    { action: Action
-    , value: String
-    }
 
 type alias Model = 
     { input: String
@@ -30,12 +26,12 @@ init =
 
 ---------- UPDATE -------------
 
-update : AddressObject -> Model -> Model
-update object model = 
-    case object.action of
-        InputChange ->
+update : Action -> Model -> Model
+update action model = 
+    case action of
+        InputChange str ->
             { model |
-                input = object.value
+                input = str
             }
         RenderChange ->
             { model |
@@ -45,26 +41,27 @@ update object model =
 ---------- VIEW ---------------
 
 -- root view
-view : Signal.Address AddressObject -> Model -> Html
+view : Signal.Address Action -> Model -> Html
 view address model = 
     div 
         []
         [ makeTitle, mainView address model ]
 
 
-makeInput : Signal.Address AddressObject -> Model -> Html
+makeInput : Signal.Address Action -> Model -> Html
 makeInput address model = 
     input 
-        [ on "input" targetValue (\str -> Signal.message address {action = InputChange, value = str}) 
+        -- function composition (InputChange takes a string, address takes Action)
+        [ on "input" targetValue (Signal.message address << InputChange) 
         , value model.input
         , style [("width", "100%")] ] 
         [ ]
 
 
-makeButton : Signal.Address AddressObject -> Html
+makeButton : Signal.Address Action -> Html
 makeButton address = 
     button
-        [ onClick address {action = RenderChange, value = "empty"} ]
+        [ onClick address RenderChange ]
         [ ]
 
 
@@ -75,7 +72,7 @@ makeTitle =
         [ text "W3-Elm"]
 
 
-mainView : Signal.Address AddressObject -> Model -> Html
+mainView : Signal.Address Action -> Model -> Html
 mainView address model = 
     let editor : Html
         editor = 
