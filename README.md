@@ -4,7 +4,7 @@ Write HTML in the left-panel, and the result is rendered in the right-panel.
 This is a port of the [W3-Schools Editor] (http://www.w3schools.com/html/tryit.asp?filename=tryhtml_default) into Elm.
 
 <p align="center">
-  <img src="https://cloud.githubusercontent.com/assets/1527504/12131872/8c4c1e68-b3d3-11e5-852d-1e0a767c1641.png" />
+  <img src="https://cloud.githubusercontent.com/assets/1527504/12133868/bc8b93f2-b3e6-11e5-8a49-32188aa8a9de.png" />
 </p>
 
 running locally
